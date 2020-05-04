@@ -100,12 +100,12 @@ def move_robot(r, loc_x, loc_y):
 
 
 
-def meeting_point(r,center,uDistance):
+def meeting_point(r, distance, center,uDistance):
 	x,y = relative_distance_to_center(r,center)
-	distance = distance_magnitude(x, y)
 	while distance>uDistance:
 		loc_x = -x/10.0
 		loc_y = -y/10.0
+		print(loc_x, loc_y)
 		r.move(loc_x, loc_y)
 		x,y = relative_distance_to_center(r,center)
 		distance = distance_magnitude(x, y)
@@ -141,14 +141,14 @@ def update_interval(start, interval, counter):
 
 	pass
 
-def create_rhombus(robots, center, interval):
+def create_rhombus(sortedRobots, center, interval):
 	uDistance = 0.5
 
 	counter = 1
 	lastIndex = 3
 
-	for index,r in enumerate(robots):
-		meeting_point(r, center, uDistance)
+	for index,r in enumerate(sortedRobots):
+		meeting_point(r.robot, r.distance, center, uDistance)
 		update_center_rhombus(center, index, interval)
 
 		if(index == lastIndex):
@@ -167,22 +167,45 @@ def create_line(robots, center, win):
 	pass
 	pass
 
+class robotDistance:  
+    def __init__(self, robot, distance):  
+        self.robot = robot  
+        self.distance = distance 
+
+def get_sorted_list(robots, center):
+
+	distList = []
+	for r in robots:
+		x,y = relative_distance_to_center(r,center)
+		distance = distance_magnitude(x, y)
+		distList.append(robotDistance(r, distance))
+
+	sorted_list = sorted(distList, key=lambda x: x.distance)
+
+	return sorted_list
+
+	pass
 
 def main():
 	#main program
 	win = draw_windows(700,600) #draw window with width = 700 and height = 600
 
 	center = draw_center(win)
-	robots = draw_swarm(40,win) #draw swarm in win
+	robots = draw_swarm(1,win) #draw swarm in win
+
+
+	sorted_list = get_sorted_list(robots, center)
+
 
 	win.getMouse() #blocking call
 
 	# create_line(robots, center, win)
 	interval = [{"min": 0, "max": 1}, {"min":1, "max" : 2}, {"min": 2, "max": 3}]
 
-	create_rhombus(robots, center, interval)
+	create_rhombus(sorted_list, center, interval)
 	win.getMouse()
 	pass
 
 if __name__ == '__main__':
 	main()
+
